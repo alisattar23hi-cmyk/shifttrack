@@ -1,0 +1,116 @@
+// Version: 4.0.0
+type AccessControlState__201339279 =
+  {
+    var adminAssigned : Bool;
+    userRoles : Map__230067015<Principal, UserRole__91647283>
+  };
+type Data__44217153<K, V> = {var count : Nat__227979830; kvs : [var ?(K, V)]};
+type Internal__283199666<K, V> =
+  {children : [var ?Node__204828119<K, V>]; data : Data__44217153<K, V>};
+type Leaf__598469445<K, V> = {data : Data__44217153<K, V>};
+type Map__230067015<K, V> = Map__405889023<K, V>;
+type Map__405889023<K, V> = Map__603270868<K, V>;
+type Map__603270868<K, V> =
+  {var root : Node__204828119<K, V>; var size : Nat__227979830};
+type Nat__227979830 = Nat__920180692;
+type Nat__920180692 = Nat;
+type NewActor__328257676 =
+  {
+    accessControlState : AccessControlState__201339279;
+    profiles : Map__230067015<Principal, WorkerProfile__900034928>;
+    shifts : Map__230067015<Nat, Shift__168410584>;
+    state : {var nextNoteId : Nat; var nextShiftId : Nat}
+  };
+type Node__204828119<K, V> =
+  {#internal : Internal__283199666<K, V>; #leaf : Leaf__598469445<K, V>};
+type NoteId__167160349 = Nat;
+type NoteId__205393037 = NoteId__167160349;
+type OldActor__373131839 = {};
+type Role__173079820 = Role__300349085;
+type Role__300349085 = {#owner; #worker};
+type ShiftId__208750324 = Nat;
+type ShiftId__533238354 = ShiftId__208750324;
+type ShiftNote__157435720 =
+  {
+    author : WorkerId__531492622;
+    authorName : Text;
+    createdAt : Timestamp__236431771;
+    id : NoteId__205393037;
+    text : Text
+  };
+type ShiftNote__890551511 =
+  {
+    author : Principal;
+    authorName : Text;
+    createdAt : Int;
+    id : Nat;
+    text : Text
+  };
+type Shift__168410584 =
+  {
+    cappedAtLimit : Bool;
+    createdAt : Int;
+    durationNs : Int;
+    endTime : ?Int;
+    id : Nat;
+    notes : [ShiftNote__890551511];
+    startTime : Int;
+    updatedAt : Int;
+    worker : Principal
+  };
+type Shift__740928251 =
+  {
+    cappedAtLimit : Bool;
+    createdAt : Timestamp__236431771;
+    durationNs : Int;
+    endTime : ?Timestamp__236431771;
+    id : ShiftId__533238354;
+    notes : [ShiftNote__157435720];
+    startTime : Timestamp__236431771;
+    updatedAt : Timestamp__236431771;
+    worker : WorkerId__531492622
+  };
+type Timestamp__236431771 = Timestamp__301639476;
+type Timestamp__301639476 = Int;
+type Timestamp__814816826 = Timestamp__301639476;
+type UserRole__91647283 = {#admin; #guest; #user};
+type WorkerId__531492622 = WorkerId__914852314;
+type WorkerId__715806024 = WorkerId__914852314;
+type WorkerId__914852314 = Principal;
+type WorkerProfile__900034928 =
+  {
+    createdAt : Int;
+    email : Text;
+    id : Principal;
+    name : Text;
+    role : {#owner; #worker}
+  };
+type WorkerProfile__952966867 =
+  {
+    createdAt : Timestamp__814816826;
+    email : Text;
+    id : WorkerId__715806024;
+    name : Text;
+    role : Role__173079820
+  };
+{
+  "20260923_235900" : (_old : OldActor__373131839) -> NewActor__328257676
+}
+actor  {
+  stable accessControlState :
+    {
+      var adminAssigned : Bool;
+      userRoles : Map__230067015<Principal, UserRole__91647283>
+    };
+  stable profiles :
+    {
+      var root : Node__204828119<Principal, WorkerProfile__952966867>;
+      var size : Nat__227979830
+    };
+  stable shifts :
+    {
+      var root : Node__204828119<Nat, Shift__740928251>;
+      var size : Nat__227979830
+    };
+  stable state : {var nextNoteId : Nat; var nextShiftId : Nat}
+};

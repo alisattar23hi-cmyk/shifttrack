@@ -1,0 +1,224 @@
+type WorkerView = 
+ record {
+   createdAt: Timestamp;
+   email: text;
+   id: WorkerId;
+   name: text;
+   role: Role;
+ };
+type WorkerTotals = 
+ record {
+   averageDurationNs: int;
+   shiftCount: nat;
+   totalDurationNs: int;
+   worker: WorkerId;
+   workerName: text;
+ };
+type WorkerSummary = 
+ record {
+   email: text;
+   id: WorkerId;
+   lastShiftEnd: opt Timestamp;
+   name: text;
+   role: Role;
+   totalDurationNs: int;
+   totalShifts: nat;
+ };
+type WorkerMonthlyReport = 
+ record {
+   averageDurationNs: int;
+   month: MonthKey;
+   shiftCount: nat;
+   shifts: vec ReportShiftRow;
+   totalDurationNs: int;
+   worker: WorkerId;
+   workerName: text;
+ };
+type WorkerId = principal;
+type Value = 
+ variant {
+   "bool": bool;
+   float: float64;
+   "int": int;
+   "nat": nat;
+   "null";
+   "text": text;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type Timestamp = int;
+type StartShiftResult = 
+ variant {
+   alreadyActive: ShiftView;
+   ok: ShiftView;
+ };
+type ShiftView = 
+ record {
+   cappedAtLimit: bool;
+   createdAt: Timestamp;
+   durationNs: int;
+   endTime: opt Timestamp;
+   id: ShiftId;
+   notes: vec ShiftNote;
+   startTime: Timestamp;
+   updatedAt: Timestamp;
+   worker: WorkerId;
+ };
+type ShiftSort = 
+ variant {
+   dateAsc;
+   dateDesc;
+   durationAsc;
+   durationDesc;
+ };
+type ShiftQuery = 
+ record {
+   from: opt Timestamp;
+   sortBy: ShiftSort;
+   to: opt Timestamp;
+ };
+type ShiftNote = 
+ record {
+   author: WorkerId;
+   authorName: text;
+   createdAt: Timestamp;
+   id: NoteId;
+   "text": text;
+ };
+type ShiftId = nat;
+type Role = 
+ variant {
+   owner;
+   worker;
+ };
+type Result__1 = 
+ variant {
+   err: Error;
+   ok;
+ };
+type Result = 
+ record {
+   hasMore: bool;
+   rows: vec vec Cell;
+ };
+type ReportShiftRow = 
+ record {
+   cappedAtLimit: bool;
+   durationNs: int;
+   endTime: opt Timestamp;
+   id: ShiftId;
+   noteCount: nat;
+   startTime: Timestamp;
+ };
+type NoteId = nat;
+type MonthKey = text;
+type ExportResult = 
+ variant {
+   notAuthorized;
+   ok: text;
+ };
+type Error = 
+ variant {
+   AmbiguousAttribute: record {
+                         field: text;
+                         sources: vec text;
+                       };
+   FrontendOriginMismatch: record {
+                             expected: vec text;
+                             got: text;
+                           };
+   FrontendOriginsNotConfigured;
+   MalformedCandid;
+   MissingField: text;
+   MixedSsoSources: record {
+                      otherKeys: vec text;
+                      ssoKeys: vec text;
+                    };
+   NoAttributes;
+   Stale: record {ageNs: nat;};
+   UnknownNonce;
+   UntrustedSsoSource: record {domain: text;};
+ };
+type EndShiftResult = 
+ variant {
+   noActiveShift;
+   ok: ShiftView;
+ };
+type CorrectShiftResult = 
+ variant {
+   invalidRange;
+   notAuthorized;
+   notFound;
+   ok: ShiftView;
+ };
+type Cell = 
+ record {
+   name: text;
+   value: Value;
+ };
+type AllWorkersMonthlyReport = 
+ record {
+   month: MonthKey;
+   shiftCount: nat;
+   totalDurationNs: int;
+   workerCount: nat;
+   workers: vec WorkerTotals;
+ };
+type AddNoteResult = 
+ variant {
+   notAuthorized;
+   notFound;
+   ok: ShiftView;
+ };
+service : {
+  _initialize_access_control: () -> ();
+  _internet_identity_sign_in_finish: () -> (Result__1);
+  _internet_identity_sign_in_start: () -> (blob);
+  /// Add a note to a shift. Allowed for the shift's worker and the owner.
+  addShiftNote: (id: nat, "text": text) -> (AddNoteResult);
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  /// Correct a shift's start/end times. Owner only.
+  correctShift: (id: nat, startTime: Timestamp, endTime: opt Timestamp) ->
+   (CorrectShiftResult);
+  /// End the caller's active shift.
+  endShift: () -> (EndShiftResult);
+  execute: (qJson: text) -> (Result) query;
+  /// Export a monthly report as a downloadable CSV document. Owner only.
+  exportMonthlyReport: (month: MonthKey) -> (ExportResult) query;
+  /// Return the caller's currently running shift, if any.
+  getActiveShift: () -> (opt ShiftView) query;
+  /// Return the owner's monthly report across all workers. Owner only.
+  getAllWorkersMonthlyReport: (month: MonthKey) ->
+   (AllWorkersMonthlyReport) query;
+  /// Return static Markdown documentation for this backend's public API.
+  getApiDoc: () -> (text) query;
+  /// Return the caller's own profile.
+  getCallerProfile: () -> (opt WorkerView) query;
+  getCallerUserRole: () -> (UserRole) query;
+  /// Return the caller's own monthly report.
+  getMyMonthlyReport: (month: MonthKey) -> (WorkerMonthlyReport) query;
+  /// Return any worker's monthly report. Owner only.
+  getWorkerMonthlyReport: (worker: principal, month: MonthKey) ->
+   (WorkerMonthlyReport) query;
+  /// Return any worker's profile. Owner only.
+  getWorkerProfile: (id: principal) -> (opt WorkerView) query;
+  isCallerAdmin: () -> (bool) query;
+  /// List the caller's own shifts, filtered and sorted.
+  listMyShifts: (filter: ShiftQuery) -> (vec ShiftView) query;
+  /// List any worker's shifts. Owner only.
+  listWorkerShifts: (worker: principal, filter: ShiftQuery) ->
+   (vec ShiftView) query;
+  /// List all workers with aggregate stats. Owner only.
+  listWorkers: () -> (vec WorkerSummary) query;
+  /// Register the caller's profile on first sign-in, or return the existing one.
+  registerProfile: (email: text, name: text) -> (WorkerView);
+  schema: () -> (text) query;
+  /// Promote or demote a worker. Owner only.
+  setWorkerRole: (id: principal, role: Role) -> (bool);
+  /// Start a shift for the caller.
+  startShift: () -> (StartShiftResult);
+}

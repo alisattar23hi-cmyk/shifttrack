@@ -1,0 +1,21 @@
+{
+  "overview": "A multi-worker shift time tracker with offline-first start/end shift timing, notes, and monthly reports.",
+  "features": [
+    "Start and end shifts with a live counting timer",
+    "Works offline and syncs when the device reconnects",
+    "Each shift capped at 10 continuous hours",
+    "Workers sign in with their own email and see only their own shifts",
+    "Add notes to any shift as a worker or the owner",
+    "Monthly reports with total hours and per-shift breakdown",
+    "Owner can view all workers and correct shift records"
+  ],
+  "category": "time-tracking",
+  "tags": [
+    "time-tracking",
+    "shifts",
+    "workforce",
+    "offline-first",
+    "reports"
+  ],
+  "last_updated": "2026-09-23T23:53:18.989Z"
+}
